@@ -37,6 +37,28 @@ public:
     }
 };
 
+
+struct School {
+    string name;
+    string address;
+    string city;
+    string state;
+    string county;
+    School* next;
+
+    School (string n, string a, string c, string s, string co) {
+        name = n;
+        address = a;
+        city = c;
+        state = s;
+        county = co;
+        next = NULL;
+    }
+
+
+};
+
+
 int main() {
     string filename = "CS210Names.csv";  // Your CSV file name
     CSVReader::parseCSVLineByLine(filename);  // Call function to parse the file
