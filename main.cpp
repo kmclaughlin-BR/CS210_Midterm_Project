@@ -36,8 +36,7 @@ public:
         file.close();
     }
 };
-
-
+template<typename T>
 struct School {
     string name;
     string address;
@@ -45,6 +44,8 @@ struct School {
     string state;
     string county;
     School* next;
+    T data;
+    School(T val) : data(val), next(nullptr) {}
 
     School (string n, string a, string c, string s, string co) {
         name = n;
@@ -55,8 +56,91 @@ struct School {
         next = NULL;
     }
 
+};
+template<typename T>
+class SchoolList {
+    School<T>* head;
+
+    public:
+    SchoolList() : head(nullptr) {}
+
+    void insertLast(T school)
+    {
+        School<T>* newNode = new School<T>(data);
+        if(head==nullptr)
+        {
+            head = newNode;
+        }else
+        {
+            School<T>* temp = head;
+            while(temp->next != nullptr)
+            {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+    }
+
+
+    void insertFirst(T school)
+    {
+        School<T>* newNode = new School<T>(data);
+        if(head==nullptr)
+        {
+            head = newNode;
+        }else
+        {
+            School<T>* temp = head;
+            temp->next = newNode;
+        }
+    }
+
+
+    void deleteByName(T name) {
+        if (head == nullptr) {
+            cout << "List is empty. Nothing to delete." << endl;
+            return;
+        }
+        if (head->data == name) {
+            School<T>* temp = head;
+            head = head->next;
+            delete temp;
+            cout << "Deleted school with name: " << name << endl;
+            return;
+        }
+        School<T>* current = head;
+        School<T>* prev = nullptr;
+
+        while (current != nullptr && current->data != name) {
+            prev = current;
+            current = current->next;
+        }
+        if (current == nullptr) {
+            cout << "Scool with name " << name << " not found." << endl;
+            return;
+        }
+        prev->next = current->next;
+        delete current;
+        cout << "Deleted school with name: " << name << endl;
+    }
+
+
+
+
+
+    void display()
+    {
+        School<T>* temp = head;
+        while(temp!=nullptr)
+        {
+            cout << temp->data << " -> ";
+            temp = temp->next;
+        }
+        cout << "nullptr" << endl;
+    }
 
 };
+
 
 
 int main() {
