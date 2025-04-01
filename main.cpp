@@ -1,3 +1,11 @@
+/*
+ * Katie McLaughlin
+ * CS 210 - 2025 SP
+ * Midterm Project
+ */
+
+
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -15,6 +23,7 @@ struct School {
     School* next;
     School* left;
     School* right;
+
     // Constructor
     School(string n, string a, string c, string s, string co) {
         name = n;
@@ -29,10 +38,10 @@ struct School {
 
 class SchoolBST {
     School* root;
+
+    // Insert helper function (recursive)
     School* insert(School* node, School* newSchool) {
-        if (node == nullptr) {
-            return newSchool;
-        }
+        if (node == nullptr) return newSchool;
         if (newSchool->name < node->name) {
             node->left = insert(node->left, newSchool);
         } else {
@@ -41,13 +50,13 @@ class SchoolBST {
         return node;
     }
 
-
+    // Find minimum node (used for deletion)
     School* findMin(School* node) {
         while (node->left) node = node->left;
         return node;
     }
 
-    // Delete function
+    // Delete function (recursive)
     School* deleteByName(School* node, const string& name) {
         if (!node) return nullptr;
 
@@ -76,12 +85,15 @@ class SchoolBST {
         }
         return node;
     }
+
+    // Search function
     School* findByName(School* node, const string& name) {
         if (!node || node->name == name) return node;
-        if (name < node->name)
-            return findByName(node->left, name);
+        if (name < node->name) return findByName(node->left, name);
         return findByName(node->right, name);
     }
+
+    // Traversal functions
     void displayInOrder(School* node) {
         if (!node) return;
         displayInOrder(node->left);
@@ -103,31 +115,76 @@ class SchoolBST {
         cout << node->name << " -> ";
     }
 
-
 public:
+    SchoolBST() : root(nullptr) {}
+
     void insertRec(School* school) {
         root = insert(root, school);
     }
+
     void deleteRec(const string& name) {
         root = deleteByName(root, name);
     }
+
     void searchByName(const string& name) {
         School* result = findByName(root, name);
         if (result) {
-            cout << "School Found: " << endl;
+            cout << "School Found:\n";
             cout << "Name: " << result->name << endl;
             cout << "Address: " << result->address << endl;
             cout << "City: " << result->city << endl;
             cout << "State: " << result->state << endl;
             cout << "County: " << result->county << endl;
         } else {
-            cout << "School with name '" << name << "' not found." << endl;
+            cout << "School with name '" << name << "' not found.\n";
         }
+    }
+
+    void displayInOrder() {
+        cout << "\nIn-Order Traversal:\n";
+        displayInOrder(root);
+        cout << "nullptr\n";
+    }
+
+    void displayPreOrder() {
+        cout << "\nPre-Order Traversal:\n";
+        displayPreOrder(root);
+        cout << "nullptr\n";
+    }
+
+    void displayPostOrder() {
+        cout << "\nPost-Order Traversal:\n";
+        displayPostOrder(root);
+        cout << "nullptr\n";
     }
 };
 
+// Read CSV file and populate the BST
+void readCSV(const string& filename, SchoolBST& schoolBST) {
+    ifstream file(filename);
+    string line;
 
+    if (!file.is_open()) {
+        cerr << "Error: Could not open file " << filename << endl;
+        return;
+    }
 
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string name, address, city, state, county;
+
+        getline(ss, name, ',');
+        getline(ss, address, ',');
+        getline(ss, city, ',');
+        getline(ss, state, ',');
+        getline(ss, county, ',');
+
+        School* newSchool = new School(name, address, city, state, county);
+        schoolBST.insertRec(newSchool);
+    }
+
+    file.close();
+}
 
 
 
@@ -155,7 +212,6 @@ public:
         head = school;
     }
 
-    // Delete a School by name
     void deleteByName(const string& name) {
         if (head == nullptr) {
             cout << "The list is empty. Nothing to delete." << endl;
@@ -199,47 +255,23 @@ public:
     }
 };
 
-// Function to read CSV file and populate the linked list
-void readCSV(const string& filename, SchoolList& schoolList) {
-    ifstream file(filename);
-    string line;
-
-    if (!file.is_open()) {
-        cerr << "Error: Could not open file " << filename << endl;
-        return;
-    }
-
-    while (getline(file, line)) {
-        stringstream ss(line);
-        string name, address, city, state, county;
-
-        // Read the CSV columns
-        getline(ss, name, ',');
-        getline(ss, address, ',');
-        getline(ss, city, ',');
-        getline(ss, state, ',');
-        getline(ss, county, ',');
-
-        // Create a new School object
-        School* newSchool = new School(name, address, city, state, county);
-
-        // Insert into the linked list
-        schoolList.insertLast(newSchool);
-    }
-
-    file.close();
-}
-
 int main() {
     string filename = "CS210Names.csv";
-    SchoolList schoolList;  
+    SchoolBST schoolBST;
+    readCSV(filename, schoolBST);
 
-    readCSV(filename, schoolList);
+    cout << "\n--- Searching for 'FRANKLIN PRIMARY SCHOOL' ---\n";
+    schoolBST.searchByName("FRANKLIN PRIMARY SCHOOL");
 
-    // Display the list
-    cout << "Schools in the list:" << endl;
-    schoolList.display();
+    cout << "\nDeleting 'FRANKLIN PRIMARY SCHOOL' ...";
+    schoolBST.deleteRec("FRANKLIN PRIMARY SCHOOL");
+    cout << "Deleted 'FRANKLIN PRIMARY SCHOOL' (if found).\n";
 
+    schoolBST.displayInOrder();
+
+    schoolBST.displayPreOrder();
+
+    schoolBST.displayPostOrder();
 
     return 0;
 }
