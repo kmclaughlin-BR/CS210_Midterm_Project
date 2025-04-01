@@ -5,7 +5,7 @@
 
 using namespace std;
 
-// Structure for a School (Linked List Node)
+// Structure for a School
 struct School {
     string name;
     string address;
@@ -13,7 +13,8 @@ struct School {
     string state;
     string county;
     School* next;
-
+    School* left;
+    School* right;
     // Constructor
     School(string n, string a, string c, string s, string co) {
         name = n;
@@ -22,10 +23,114 @@ struct School {
         state = s;
         county = co;
         next = nullptr;
+        left = right = nullptr;
     }
 };
 
-// Linked List to store Schools
+class SchoolBST {
+    School* root;
+    School* insert(School* node, School* newSchool) {
+        if (node == nullptr) {
+            return newSchool;
+        }
+        if (newSchool->name < node->name) {
+            node->left = insert(node->left, newSchool);
+        } else {
+            node->right = insert(node->right, newSchool);
+        }
+        return node;
+    }
+
+
+    School* findMin(School* node) {
+        while (node->left) node = node->left;
+        return node;
+    }
+
+    // Delete function
+    School* deleteByName(School* node, const string& name) {
+        if (!node) return nullptr;
+
+        if (name < node->name) {
+            node->left = deleteByName(node->left, name);
+        } else if (name > node->name) {
+            node->right = deleteByName(node->right, name);
+        } else {
+            if (!node->left) {
+                School* temp = node->right;
+                delete node;
+                return temp;
+            } else if (!node->right) {
+                School* temp = node->left;
+                delete node;
+                return temp;
+            }
+
+            School* temp = findMin(node->right);
+            node->name = temp->name;
+            node->address = temp->address;
+            node->city = temp->city;
+            node->state = temp->state;
+            node->county = temp->county;
+            node->right = deleteByName(node->right, temp->name);
+        }
+        return node;
+    }
+    School* findByName(School* node, const string& name) {
+        if (!node || node->name == name) return node;
+        if (name < node->name)
+            return findByName(node->left, name);
+        return findByName(node->right, name);
+    }
+    void displayInOrder(School* node) {
+        if (!node) return;
+        displayInOrder(node->left);
+        cout << node->name << " -> ";
+        displayInOrder(node->right);
+    }
+
+    void displayPreOrder(School* node) {
+        if (!node) return;
+        cout << node->name << " -> ";
+        displayPreOrder(node->left);
+        displayPreOrder(node->right);
+    }
+
+    void displayPostOrder(School* node) {
+        if (!node) return;
+        displayPostOrder(node->left);
+        displayPostOrder(node->right);
+        cout << node->name << " -> ";
+    }
+
+
+public:
+    void insertRec(School* school) {
+        root = insert(root, school);
+    }
+    void deleteRec(const string& name) {
+        root = deleteByName(root, name);
+    }
+    void searchByName(const string& name) {
+        School* result = findByName(root, name);
+        if (result) {
+            cout << "School Found: " << endl;
+            cout << "Name: " << result->name << endl;
+            cout << "Address: " << result->address << endl;
+            cout << "City: " << result->city << endl;
+            cout << "State: " << result->state << endl;
+            cout << "County: " << result->county << endl;
+        } else {
+            cout << "School with name '" << name << "' not found." << endl;
+        }
+    }
+};
+
+
+
+
+
+
 class SchoolList {
     School* head;
 
@@ -45,7 +150,6 @@ public:
         }
     }
 
-    // Insert a new School at the beginning of the list
     void insertFirst(School* school) {
         school->next = head;
         head = school;
@@ -128,9 +232,8 @@ void readCSV(const string& filename, SchoolList& schoolList) {
 
 int main() {
     string filename = "CS210Names.csv";
-    SchoolList schoolList;  // Create a linked list
+    SchoolList schoolList;  
 
-    // Read CSV file and populate the linked list
     readCSV(filename, schoolList);
 
     // Display the list
